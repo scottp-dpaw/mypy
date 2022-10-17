@@ -72,15 +72,6 @@ def try_split(v: str | Sequence[str], split_regex: str = "[,]") -> list[str]:
     return [p.strip() for p in v]
 
 
-def validate_codes(codes: list[str]) -> list[str]:
-    invalid_codes = set(codes) - set(error_codes.keys())
-    if invalid_codes:
-        raise argparse.ArgumentTypeError(
-            f"Invalid error code(s): {', '.join(sorted(invalid_codes))}"
-        )
-    return codes
-
-
 def validate_package_allow_list(allow_list: list[str]) -> list[str]:
     for p in allow_list:
         msg = f"Invalid allow list entry: {p}"
@@ -194,8 +185,8 @@ ini_config_types: Final[dict[str, _INI_PARSER_CALLABLE]] = {
         [p.strip() for p in split_commas(s)]
     ),
     "enable_incomplete_feature": lambda s: [p.strip() for p in split_commas(s)],
-    "disable_error_code": lambda s: validate_codes([p.strip() for p in split_commas(s)]),
-    "enable_error_code": lambda s: validate_codes([p.strip() for p in split_commas(s)]),
+    "disable_error_code": lambda s: [p.strip() for p in split_commas(s)],
+    "enable_error_code": lambda s: [p.strip() for p in split_commas(s)],
     "package_root": lambda s: [p.strip() for p in split_commas(s)],
     "cache_dir": expand_path,
     "python_executable": expand_path,
@@ -219,8 +210,8 @@ toml_config_types.update(
         "always_false": try_split,
         "untyped_calls_exclude": lambda s: validate_package_allow_list(try_split(s)),
         "enable_incomplete_feature": try_split,
-        "disable_error_code": lambda s: validate_codes(try_split(s)),
-        "enable_error_code": lambda s: validate_codes(try_split(s)),
+        "disable_error_code": try_split,
+        "enable_error_code": try_split,
         "package_root": try_split,
         "exclude": str_or_array_as_list,
         "packages": try_split,
